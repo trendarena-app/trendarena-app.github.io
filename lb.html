@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trend Arena - Leaderboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .leaderboard-table {
+      width: 100%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: inherit;
+    }
+
+    .leaderboard-table th {
+      background: rgba(255, 255, 255, 0.05);
+      font-weight: bold;
+      font-size: inherit;
+    }
+
+    .leaderboard-table tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .place {
+      width: 60px;
+      text-align: center;
+    }
+
+    .medal {
+      font-size: inherit;
+      display: inline-block;
+      width: 2em;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .leaderboard-table .player-mono {
+      font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing: 0.02em;
+      max-width: 10em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+
+    .value {
+      text-align: right;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/" class="header-logo">
+      <img src="images/logo.png" alt="Trend Arena Logo" class="logo" />
+      <span class="header-title">TrendArena</span>
+    </a>
+    <nav class="menu">
+      <a href="lb.html" class="menu-link">Leaderboard</a>
+      <a href="#docs" class="menu-link">Docs</a>
+      <a href="#qa" class="menu-link">Q&amp;A</a>
+    </nav>
+  </div>
+  <div class="main-content">
+  <!--
+
+    <div class="concept">
+        <h2><span class="emoji">🔥</span> How It Works</h2>
+        <div class="features">
+            ...
+        </div>
+    </div>
+  -->
+
+
+    <h2><span class="emoji">🏆</span> Leaderboard (Top 10)</h2>
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th class="place">Place</th>
+          <th>Player</th>
+          <th class="value">Total Value</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody">
+        <!-- Data will be populated by JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchLeaderboard() {
+      try {
+        const response = await fetch('https://trend-arena-app-staging-82cf9bc75db8.herokuapp.com/api/leaderboard');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          const sortedData = data.data
+            .sort((a, b) => parseFloat(b.totalValue) - parseFloat(a.totalValue))
+            .slice(0, 10);
+
+          const tbody = document.getElementById('leaderboardBody');
+          tbody.innerHTML = '';
+
+          sortedData.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            const place = index + 1;
+            
+            let placeCell = '';
+            if (place === 1) placeCell = '<span class="medal">🥇</span>';
+            else if (place === 2) placeCell = '<span class="medal">🥈</span>';
+            else if (place === 3) placeCell = '<span class="medal">🥉</span>';
+            else placeCell = `<span class="medal">${place}</span>`;
+
+            row.innerHTML = `
+              <td class="place">${placeCell}</td>
+              <td class="player-mono" title="${entry.tgName}">${entry.tgName}</td>
+              <td class="value">$${parseFloat(entry.totalValue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+      }
+    }
+
+    // Fetch leaderboard data when page loads
+    fetchLeaderboard();
+  </script>
+</body>
+</html> 
